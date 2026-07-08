@@ -633,50 +633,6 @@ class AdminCommands(commands.Cog):
             )
     
     @app_commands.command(
-        name="list-pending",
-        description="Tampilkan semua registrasi pending",
-    )
-    @app_commands.checks.has_role("Admin")
-    async def list_pending(self, interaction: discord.Interaction):
-        """List all pending registrations."""
-        await interaction.response.defer(ephemeral=True)
-        
-        async with get_db() as db:
-            result = await db.execute(
-                select(PendingRegistration).where(
-                    PendingRegistration.status == "pending"
-                )
-            )
-            pending_list = result.scalars().all()
-        
-        if not pending_list:
-            await interaction.followup.send(
-                "✅ Tidak ada registrasi pending.", ephemeral=True
-            )
-            return
-        
-        embed = discord.Embed(
-            title="📋 Registrasi Pending",
-            description=f"Ada {len(pending_list)} registrasi menunggu persetujuan:",
-            color=discord.Color.yellow(),
-        )
-        
-        for pending in pending_list:
-            embed.add_field(
-                name=f"{pending.nama_lengkap} ({pending.nim})",
-                value=(
-                    f"**Prodi:** {pending.prodi}\n"
-                    f"**Kelas:** {pending.kelas}\n"
-                    f"**Discord:** <@{pending.discord_id}>"
-                ),
-                inline=False,
-            )
-        
-        embed.set_footer(text="Gunakan /approve untuk menyetujui registrasi")
-        
-        await interaction.followup.send(embed=embed, ephemeral=True)
-    
-    @app_commands.command(
         name="class-info",
         description="Lihat informasi kelas",
     )
