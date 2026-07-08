@@ -7,7 +7,6 @@ from .selects import (
     StudentSelect,
     RelatorSelect,
     MultiStudentSelect,
-    DosenSelect,
 )
 from .select_views import (
     SetRelatorView,
@@ -15,6 +14,7 @@ from .select_views import (
     ApproveStudentView,
     ClassInfoView,
     BatchApproveView,
+    DosenSelect,
 )
 
 __all__ = [
