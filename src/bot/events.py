@@ -1,4 +1,4 @@
-"""Event handlers for the bot."""
+"""Event handlers — Welcome wizard for new members."""
 
 import logging
 
@@ -10,67 +10,91 @@ logger = logging.getLogger(__name__)
 
 class EventHandlers(commands.Cog):
     """Event handlers for bot events."""
-    
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-    
+
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        """Handle new member joining the server."""
+        """Show welcome wizard when new member joins."""
         logger.info(f"New member joined: {member.id} ({member.display_name})")
-        
-        # Check if member already has Mahasiswa role
+
+        # Check if already registered
         mahasiswa_role = discord.utils.get(member.guild.roles, name="Mahasiswa")
         if mahasiswa_role in member.roles:
-            return  # Already registered
-        
+            return
+
         # Find registrasi channel
         registrasi_channel = discord.utils.get(
             member.guild.channels, name="registrasi"
         )
-        
+
         if registrasi_channel:
-            # Send welcome message to registrasi channel
             embed = discord.Embed(
-                title="👋 Selamat Datang!",
+                title="🎓 Selamat Datang di Server FIKTI UMSU!",
                 description=(
-                    f"Selamat datang di Server FIKTI UMSU, {member.mention}!\n\n"
-                    "Untuk mendaftar sebagai mahasiswa, silakan ketik:\n"
-                    "```\n/register\n```\n\n"
-                    "Anda akan diminta mengisi data:\n"
-                    "• NIM (10 digit)\n"
-                    "• Nama Lengkap\n"
-                    "• Program Studi (TI/SI/SD)\n"
-                    "• Kelas (contoh: A1, B2)\n"
-                    "• No. WhatsApp (opsional)\n\n"
-                    "Setelah registrasi, admin akan memverifikasi data Anda."
+                    f"Halo {member.mention}! 👋\n\n"
+                    "Selamat datang di server resmi **Fakultas Ilmu Komputer dan Teknologi Informasi** "
+                    "Universitas Muhammadiyah Sumatera Utara.\n\n"
+                    "---\n\n"
+                    "## 📋 Langkah Selanjutnya\n\n"
+                    "Untuk bisa mengakses channel kelas dan materi perkuliahan, "
+                    "silakan ikuti langkah berikut:\n\n"
+                    "### Step 1️⃣ — Ketik `/register`\n"
+                    "Ketik perintah `/register` di channel ini.\n\n"
+                    "### Step 2️⃣ — Isi Formulir Registrasi\n"
+                    "Isi data Anda di modal yang muncul:\n"
+                    "• **NIM** — 10 digit angka (contoh: `2471110042`)\n"
+                    "• **Nama Lengkap** — Sesuai KTP\n"
+                    "• **Program Studi** — `TI` / `SI` / `SD`\n"
+                    "• **Kelas** — Huruf + Nomor (contoh: `A1`, `B2`)\n"
+                    "• **No. WhatsApp** — (opsional)\n\n"
+                    "### Step 3️⃣ — Langsung Masuk Kelas!\n"
+                    "Setelah mengisi formulir, Anda akan **otomatis** masuk ke channel kelas Anda. "
+                    "Tidak perlu menunggu persetujuan admin! ✅\n\n"
+                    "---\n\n"
+                    "## 💡 Info Penting\n\n"
+                    "• **Channel Kelas** — Hanya Anda dan teman sekelas yang bisa melihat\n"
+                    "• **#umum** — Channel diskusi untuk semua mahasiswa\n"
+                    "• **#pengumuman** — Informasi dari dosen dan admin\n\n"
+                    "## ⚠️ Catatan\n\n"
+                    "• Pastikan NIM dan data Anda **benar** sebelum submit\n"
+                    "• Satu akun Discord hanya bisa registrasi **satu kali**\n"
+                    "• Jika ada kendala, hubungi admin di channel **#admin**\n\n"
+                    "---\n\n"
+                    "**Ketik `/register` untuk memulai!** 👇"
                 ),
                 color=discord.Color.blue(),
             )
             embed.set_thumbnail(
-                url=member.display_avatar.url
-                if member.display_avatar
-                else None
+                url=member.display_avatar.url if member.display_avatar else None
             )
-            
+            embed.set_footer(
+                text="FIKTi UMSU • Teaching Assistant Bot",
+                icon_url=member.guild.icon.url if member.guild.icon else None,
+            )
+
             await registrasi_channel.send(embed=embed)
-        
-        # DM welcome message
+
+        # DM welcome
         try:
             await member.send(
                 f"👋 Selamat datang di Server FIKTI UMSU!\n\n"
-                f"Untuk mendaftar, silakan join channel #registrasi di server "
-                f"dan ketik `/register`.\n\n"
-                f"Anda akan diminta mengisi data mahasiswa Anda."
+                f"Untuk mendaftar sebagai mahasiswa:\n"
+                f"1. Buka channel **#registrasi** di server\n"
+                f"2. Ketik `/register`\n"
+                f"3. Isi formulir yang muncul\n"
+                f"4. Anda akan otomatis masuk ke channel kelas!\n\n"
+                f"Tidak perlu menunggu persetujuan admin. 🎉"
             )
         except discord.Forbidden:
             logger.warning(f"Could not DM new member {member.id}")
-    
+
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
         """Handle member leaving the server."""
         logger.info(f"Member left: {member.id} ({member.display_name})")
-    
+
     @commands.Cog.listener()
     async def on_command_error(
         self, ctx: commands.Context, error: commands.CommandError
@@ -87,7 +111,7 @@ class EventHandlers(commands.Cog):
                 ephemeral=True,
             )
         elif isinstance(error, commands.CommandNotFound):
-            pass  # Ignore unknown commands
+            pass
         else:
             logger.error(f"Command error: {error}", exc_info=True)
             await ctx.send(
