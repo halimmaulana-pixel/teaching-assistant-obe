@@ -416,48 +416,6 @@ class AdminCommands(commands.Cog):
             f"by {interaction.user.id}"
         )
     
-    @app_commands.command(
-        name="approve",
-        description="Setujui registrasi mahasiswa",
-    )
-    @app_commands.checks.has_role("Admin")
-    async def approve_student(self, interaction: discord.Interaction):
-        """Approve student using dropdown selection."""
-        view = ApproveStudentView()
-        
-        # Load pending students
-        await view.student_select.fetch_options()
-        
-        # Check if options available
-        if not view.student_select.options:
-            await interaction.response.send_message(
-                "✅ Tidak ada registrasi pending.",
-                ephemeral=True,
-            )
-            return
-        
-        embed = discord.Embed(
-            title="✅ Approve Mahasiswa",
-            description=(
-                "Pilih mahasiswa dari dropdown di bawah:\n\n"
-                "1. **Pilih Mahasiswa** — Mahasiswa yang akan di-approve\n"
-                "2. **Klik Approve/Reject** — Untuk menyelesaikan"
-            ),
-            color=discord.Color.green(),
-        )
-        
-        await interaction.response.send_message(
-            embed=embed,
-            view=view,
-            ephemeral=True,
-        )
-        
-        # Wait for view
-        await view.wait()
-        
-        if view.result and view.selected_student:
-            await self._process_approval(interaction, view)
-    
     async def _process_approval(
         self,
         interaction: discord.Interaction,
