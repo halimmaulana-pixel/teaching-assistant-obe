@@ -92,14 +92,23 @@ async def main() -> None:
     
     logger.info("Starting Teaching Assistant Bot...")
     
-    # Initialize database
-    await init_db()
-    logger.info("Database initialized")
-    
-    # Start health check server for Railway
+    # Start health check server FIRST (before anything else)
     import os
     port = int(os.getenv("PORT", 8080))
-    await start_health_server(port)
+    try:
+        await start_health_server(port)
+        logger.info(f"Health check server started on port {port}")
+    except Exception as e:
+        logger.error(f"Failed to start health server: {e}")
+        # Continue anyway - bot might still work
+    
+    # Initialize database
+    try:
+        await init_db()
+        logger.info("Database initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {e}")
+        # Continue anyway - might be able to connect later
     
     bot = create_bot()
     
@@ -156,9 +165,14 @@ async def main() -> None:
         
     except KeyboardInterrupt:
         logger.info("Bot shutting down...")
+    except Exception as e:
+        logger.error(f"Fatal error: {e}", exc_info=True)
     finally:
         # Cleanup
-        await bot.close()
+        try:
+            await bot.close()
+        except Exception:
+            pass
         await close_db()
         logger.info("Bot shutdown complete")
 
