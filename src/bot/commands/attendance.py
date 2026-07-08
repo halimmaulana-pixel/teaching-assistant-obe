@@ -135,7 +135,7 @@ class AttendanceCommands(commands.Cog):
             timestamp=datetime.utcnow()
         )
         embed.add_field(name="Total Hadir", value=str(attendance_count), inline=True)
-        embed.set_footer(text=Ditutup oleh {interaction.user.display_name})
+        embed.set_footer(text=f"Ditutup oleh {interaction.user.display_name}")
         
         await interaction.followup.send(embed=embed, ephemeral=True)
         
