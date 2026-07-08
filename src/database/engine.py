@@ -1,7 +1,7 @@
 """Database engine and session management — Singleton pattern."""
 
 import logging
-from typing import AsyncGenerator
+from contextlib import asynccontextmanager
 
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -64,7 +64,8 @@ async def init_db() -> None:
     logger.info("Database tables created")
 
 
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
+@asynccontextmanager
+async def get_db():
     """Get database session (context manager)."""
     session_factory = get_session_factory()
     async with session_factory() as session:
